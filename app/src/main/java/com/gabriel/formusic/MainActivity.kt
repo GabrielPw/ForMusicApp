@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,12 +59,14 @@ import androidx.documentfile.provider.DocumentFile
 import com.gabriel.formusic.ui.components.CurrentPlayingSection
 import com.gabriel.formusic.ui.components.MusicListItem
 import com.gabriel.formusic.ui.components.TestComponents
+import com.gabriel.formusic.ui.theme.AzulEscuro
 import com.gabriel.formusic.ui.theme.AzulOpaco
 import com.gabriel.formusic.ui.theme.JetpackComposeLearningTheme
 import com.gabriel.formusic.ui.theme.LightTextColorPurple
 import com.gabriel.formusic.ui.theme.LightTextColorPurple_2
-import com.gabriel.formusic.ui.theme.RoxoClaroComTranparencia
 import com.gabriel.formusic.ui.theme.RoxoEscuro_2
+import com.gabriel.formusic.ui.theme.RoxoEscuro_3
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : ComponentActivity() {
@@ -222,7 +225,7 @@ class MainActivity : ComponentActivity() {
         return musicFiles
     }
 
-    @Preview
+    //@Preview
     @Composable
     fun primeiraTelaPreview(){
         JetpackComposeLearningTheme {
@@ -232,11 +235,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Preview(showBackground = true, name = "NEXUS_7", device = Devices.NEXUS_7)
     @Composable
     fun linearGradient() {
         val gradient = Brush.linearGradient(
-            0.0f to RoxoEscuro_2,
-            500.0f to RoxoClaroComTranparencia,
+            0.2f to RoxoEscuro_3,
+            20.0f to AzulEscuro,
             start = Offset.Zero,
             end = Offset.Infinite
         )
@@ -283,9 +287,24 @@ class MainActivity : ComponentActivity() {
                     .weight(1f)) {
                 Text(text = musicItem.tituloMusica, color = LightTextColorPurple_2, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 Text(text = musicItem.nomeArtista, color = LightTextColorPurple, fontSize = 12.sp)
+            }
+            if(isSelected){
+                val dots_icon: Painter = painterResource(id = R.drawable.dots_icon)
+                Image(painter = dots_icon, contentDescription = "")
+            }else{
+                var durationMillis = musicItem.musicDuration.toLong()
+                var minutes = TimeUnit.MILLISECONDS.toMinutes(durationMillis)
+                var song_seconds = TimeUnit.MILLISECONDS.toSeconds(durationMillis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(durationMillis))
+
+                val format = if(song_seconds.toString().length == 1) "%d:0%d" else "%d:%d"
+                var duration = String.format(format,
+                    TimeUnit.MILLISECONDS.toMinutes(durationMillis),
+                    TimeUnit.MILLISECONDS.toSeconds(durationMillis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(durationMillis))
+                )
+
+                Text(text = duration, color = Color.White, fontSize = 10.sp)
 
             }
-            Text(text = musicItem.musicDuration.toString(), color = Color.White, fontSize = 10.sp)
             Spacer(Modifier.size(10.dp))
         }
     }
@@ -318,7 +337,6 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
-
         }
     }
 
