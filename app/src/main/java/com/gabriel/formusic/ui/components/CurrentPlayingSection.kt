@@ -3,8 +3,10 @@ package com.gabriel.formusic.ui.components
 import android.graphics.BitmapFactory
 import android.media.MediaPlayer
 import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,12 +33,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gabriel.formusic.R
+import com.gabriel.formusic.service.MusicMediaPlayer
 import com.gabriel.formusic.ui.theme.Laranja
 import com.gabriel.formusic.ui.theme.RoxoEscuro_2
 
-class CurrentPlayingSection(mediaPlayer:MediaPlayer) {
+class CurrentPlayingSection(musicMediaPlayer:MusicMediaPlayer) {
 
-    val mediaPlayer = mediaPlayer
+    var primeroUpdate = false
+
+    val musicMediaPlayer = musicMediaPlayer
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun render(selectedMusic: MusicListItem){
         var musicIsPlaying by remember { mutableStateOf(true) }
@@ -44,11 +50,6 @@ class CurrentPlayingSection(mediaPlayer:MediaPlayer) {
         Row(
             Modifier
                 .background(RoxoEscuro_2)
-//                .border(
-//                    width = 1.dp,
-//                    color = AzulClaro,
-//                    shape = RoundedCornerShape(5.dp)
-//                )
                 .height((65).dp), verticalAlignment = Alignment.CenterVertically
         ) {
             val discIcon: Painter = painterResource(id = R.drawable.disc_icon)
@@ -66,31 +67,42 @@ class CurrentPlayingSection(mediaPlayer:MediaPlayer) {
             ) {
 
                 Log.i("UPDATE_", "render: ${selectedMusic.tituloMusica}")
-                Text(text = "${selectedMusic.tituloMusica}", color = Color.White, fontSize = 14.sp)
+                Text(text = "${selectedMusic.tituloMusica}", color = Color.White, fontSize = 15.sp, modifier = Modifier.basicMarquee())
                 Text(text = "${selectedMusic.nomeArtista}", color = Color.White, fontSize = 12.sp)
 
                 Spacer(modifier = Modifier.padding((15).dp))
-                musicPlayerProgressBar(mediaPlayer = mediaPlayer)
+                musicPlayerProgressBar(mediaPlayer = musicMediaPlayer.mPlayer)
             }
+
+            musicIsPlaying = musicMediaPlayer.mPlayer.isPlaying
+
             val playPauseIcon: Painter = if(musicIsPlaying) painterResource(id = R.drawable.pause_icon) else painterResource(id = R.drawable.play_icon)
             Spacer(Modifier.size(15.dp))
             Image(painter = playPauseIcon, contentDescription = "",
                 Modifier
                     .clickable {
-
-                        if (mediaPlayer.isPlaying) {
+                        if (musicMediaPlayer.mPlayer.isPlaying) {
                             musicIsPlaying = false
-                            mediaPlayer.pause()
+                            musicMediaPlayer.mPlayer.pause()
                             playPauseIcon
                         } else if (!selectedMusic.tituloMusica.isEmpty()) {
                             musicIsPlaying = true
-                            mediaPlayer.start()
+                            musicMediaPlayer.mPlayer.start()
                         }
                     }
                     .size(34.dp))
             Spacer(Modifier.size(15.dp))
+
+            if (primeroUpdate == false){
+                musicIsPlaying = !musicIsPlaying
+                musicIsPlaying = !musicIsPlaying
+
+                primeroUpdate = true
+            }
         }
     }
+
+
 
     @Composable
     fun musicPlayerProgressBar(
