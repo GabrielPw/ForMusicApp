@@ -2,6 +2,7 @@ package com.gabriel.formusic.ui.components
 
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,12 +39,12 @@ import com.gabriel.formusic.ui.theme.AzulOpaco
 import com.gabriel.formusic.ui.theme.LightTextColorPurple
 import com.gabriel.formusic.ui.theme.LightTextColorPurple_2
 import com.gabriel.formusic.ui.theme.RoxoEscuro_2
-import java.util.concurrent.TimeUnit
 
 class MusicList(musicMediaPlayer: MusicMediaPlayer) {
 
     val musicMediaPlayer = musicMediaPlayer
     var musicList by mutableStateOf<List<MusicListItem>>(emptyList())
+    var filteredList by mutableStateOf<List<MusicListItem>>(emptyList())
 
     @Composable
     fun musicBoxLayout(musicItem: MusicListItem,
@@ -89,36 +90,25 @@ class MusicList(musicMediaPlayer: MusicMediaPlayer) {
                 val dots_icon: Painter = painterResource(id = R.drawable.dots_icon)
                 Image(painter = dots_icon, contentDescription = "")
             }else{
-                var durationMillis = musicItem.musicDuration.toLong()
-                var minutes = TimeUnit.MILLISECONDS.toMinutes(durationMillis)
-                var song_seconds = TimeUnit.MILLISECONDS.toSeconds(durationMillis) - TimeUnit.MINUTES.toSeconds(
-                    TimeUnit.MILLISECONDS.toMinutes(durationMillis))
-
-                val format = if(song_seconds.toString().length == 1) "%d:0%d" else "%d:%d"
-                var duration = String.format(format,
-                    TimeUnit.MILLISECONDS.toMinutes(durationMillis),
-                    TimeUnit.MILLISECONDS.toSeconds(durationMillis) - TimeUnit.MINUTES.toSeconds(
-                        TimeUnit.MILLISECONDS.toMinutes(durationMillis))
-                )
-
-                Text(text = duration, color = Color.White, fontSize = 10.sp)
-
+                Text(text = musicItem.musicDurationFormatedString, color = Color.White, fontSize = 10.sp)
             }
             Spacer(Modifier.size(10.dp))
         }
     }
 
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun render(selectedMusic:MusicListItem, onMusicSelected: (MusicListItem?) -> Unit){
         var localSelectedMusic: MusicListItem? by remember { mutableStateOf(selectedMusic) }
+
         Row(Modifier.padding(horizontal = 20.dp)) {
             LazyColumn {
                 items(
-                    count = musicList.size,
+                    count = if (filteredList.isEmpty()) musicList.size else filteredList.size,
                     key = {it},
                     itemContent = {
                             index ->
-                        var musicItem = musicList[index]
+                        var musicItem = if (filteredList.isEmpty()) musicList[index] else filteredList[index]
                         val isSelected = localSelectedMusic == musicItem
                         musicBoxLayout(musicItem, isSelected, onClick = {
                             localSelectedMusic = musicItem
@@ -127,7 +117,7 @@ class MusicList(musicMediaPlayer: MusicMediaPlayer) {
                                 musicMediaPlayer.reproduzirMusica(musicItem)
                             }
                         })
-
+                        Modifier.animateItemPlacement()
                         Spacer(modifier = Modifier.padding(10.dp))
                     }
                 )
@@ -135,12 +125,17 @@ class MusicList(musicMediaPlayer: MusicMediaPlayer) {
         }
 
         musicMediaPlayer.mPlayer.setOnCompletionListener {
-
             var finishedSongIndex = musicList.indexOf(selectedMusic)
             var nextSongToBePlayed = if(finishedSongIndex + 1 >= musicList.size) 0 else finishedSongIndex + 1
             musicMediaPlayer.reproduzirMusica(musicList[nextSongToBePlayed])
             localSelectedMusic = musicList[nextSongToBePlayed]
             onMusicSelected(localSelectedMusic)
         }
+    }
+
+    fun performQuery(query:String){
+
+        var newFilteredList = musicList.filter { music -> music.tituloMusica.contains(query, ignoreCase = true) }
+        this.filteredList = newFilteredList
     }
 }
