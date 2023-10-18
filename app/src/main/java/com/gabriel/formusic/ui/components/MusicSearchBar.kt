@@ -13,14 +13,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import com.gabriel.formusic.ui.musicList.MusicList
 import com.gabriel.formusic.ui.theme.LightTextColorPurple
 
-class MusicSearchBar {
+class MusicSearchBar(musicList: MusicList) {
 
+    var musicList = musicList
     @Composable
     fun render(){
 
-        var text: String by remember { mutableStateOf("") }
+        var query: String by remember { mutableStateOf("") }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -28,8 +30,15 @@ class MusicSearchBar {
         ) {
             ProvideTextStyle(TextStyle(color = LightTextColorPurple)) {
                 OutlinedTextField(
-                    value = text,
-                    onValueChange = { newText: String -> text = newText },
+                    value = query,
+                    onValueChange = { onQueryChanged ->
+                        query = onQueryChanged
+                        if(onQueryChanged.isNotEmpty()){
+                            musicList.performQuery(query)
+                        }else{
+                            musicList.filteredList = emptyList()
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

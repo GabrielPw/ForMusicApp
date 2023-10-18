@@ -1,4 +1,4 @@
-package com.gabriel.formusic.ui.components
+package com.gabriel.formusic.ui.musicList
 
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.BorderStroke
@@ -21,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -98,22 +97,20 @@ class MusicList(musicMediaPlayer: MusicMediaPlayer) {
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun render(selectedMusic:MusicListItem, onMusicSelected: (MusicListItem?) -> Unit){
-        var localSelectedMusic: MusicListItem? by remember { mutableStateOf(selectedMusic) }
+    fun render(musicListViewModel: MusicListViewModel){
 
+        var selectedMusic = musicListViewModel.selectedMusic
         Row(Modifier.padding(horizontal = 20.dp)) {
             LazyColumn {
                 items(
                     count = if (filteredList.isEmpty()) musicList.size else filteredList.size,
-                    key = {it},
                     itemContent = {
                             index ->
                         var musicItem = if (filteredList.isEmpty()) musicList[index] else filteredList[index]
-                        val isSelected = localSelectedMusic == musicItem
+                        val isSelected = selectedMusic.value == musicItem
                         musicBoxLayout(musicItem, isSelected, onClick = {
-                            localSelectedMusic = musicItem
-                            onMusicSelected(localSelectedMusic)
-                            if (localSelectedMusic == musicItem) {
+                            selectedMusic.value = musicItem
+                            if (selectedMusic.value == musicItem) {
                                 musicMediaPlayer.reproduzirMusica(musicItem)
                             }
                         })
@@ -125,12 +122,12 @@ class MusicList(musicMediaPlayer: MusicMediaPlayer) {
         }
 
         musicMediaPlayer.mPlayer.setOnCompletionListener {
-            var finishedSongIndex = musicList.indexOf(selectedMusic)
+            var finishedSongIndex = musicList.indexOf(selectedMusic.value)
             var nextSongToBePlayed = if(finishedSongIndex + 1 >= musicList.size) 0 else finishedSongIndex + 1
             musicMediaPlayer.reproduzirMusica(musicList[nextSongToBePlayed])
-            localSelectedMusic = musicList[nextSongToBePlayed]
-            onMusicSelected(localSelectedMusic)
+            selectedMusic.value = musicList[nextSongToBePlayed]
         }
+
     }
 
     fun performQuery(query:String){

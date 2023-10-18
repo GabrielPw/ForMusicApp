@@ -1,4 +1,4 @@
-package com.gabriel.formusic.ui.components
+package com.gabriel.formusic.ui.musicList
 
 import android.net.Uri
 

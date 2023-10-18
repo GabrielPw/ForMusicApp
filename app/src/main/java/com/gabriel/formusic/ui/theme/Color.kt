@@ -11,6 +11,7 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 val Vermelho = Color(0xFF9E2936)
+val RosaEscuro = Color(0xFF942048)
 val Laranja = Color(0xFFE06A46)
 val RoxoEscuro = Color(0xFF15072D)
 val RoxoEscuro_2 = Color(0xFF0D041D)
@@ -20,9 +21,11 @@ val RoxoPurpura = Color(0x7D633C7E)
 
 val AzulOpaco = Color(0xFF1D4265)
 val Azul = Color(0xFF275F94)
-val AzulEscuro = Color(0xFF263B88)
+val AzulEscuro = Color(0xFF2E3E79)
 val RoxoClaro = Color(0x755F32AA)
 val AzulClaro = Color(0xFFADA6F6) // 593E82
+
+val TabSelectedBlue = Color(0xFF6F5BE2)
 
 
 val LightTextColorPurple = Color(0xFFE9DBFF)//E9DBFF

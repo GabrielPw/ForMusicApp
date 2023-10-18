@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.gabriel.formusic"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.gabriel.formusic"
@@ -74,6 +74,7 @@ dependencies {
 
     implementation ("androidx.compose.ui:ui-tooling-preview:1.2.1")
     debugImplementation ("androidx.compose.ui:ui-tooling:1.2.1")
+    implementation("androidx.navigation:navigation-compose:2.7.4")
 
 
 }

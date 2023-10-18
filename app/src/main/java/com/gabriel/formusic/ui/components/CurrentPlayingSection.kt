@@ -3,6 +3,14 @@ package com.gabriel.formusic.ui.components
 import android.graphics.BitmapFactory
 import android.media.MediaPlayer
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,28 +37,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gabriel.formusic.R
 import com.gabriel.formusic.service.MusicMediaPlayer
+import com.gabriel.formusic.ui.musicList.MusicListViewModel
 import com.gabriel.formusic.ui.theme.Laranja
 import com.gabriel.formusic.ui.theme.RoxoEscuro_2
 
-class CurrentPlayingSection(musicMediaPlayer:MusicMediaPlayer) {
+class CurrentPlayingSection(musicMediaPlayer:MusicMediaPlayer, musicListViewModel: MusicListViewModel) {
 
+    val musicListViewModel:MusicListViewModel = musicListViewModel
     var primeroUpdate = false
-
     val musicMediaPlayer = musicMediaPlayer
+    var updateUI = mutableStateOf(true)
+
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun render(selectedMusic: MusicListItem){
+    fun render(onClick: () -> Unit){
+        var selectedMusic = musicListViewModel.selectedMusic.value
         var musicIsPlaying by remember { mutableStateOf(true) }
+        val context = LocalContext.current
 
         Row(
             Modifier
                 .background(RoxoEscuro_2)
-                .height((65).dp), verticalAlignment = Alignment.CenterVertically
+                .height((65).dp)
+                .clickable { onClick() }
+            , verticalAlignment = Alignment.CenterVertically
         ) {
             val discIcon: Painter = painterResource(id = R.drawable.disc_icon)
             val imageCapa = BitmapFactory.decodeByteArray(selectedMusic.photoCapa, 0, selectedMusic.photoCapa.size);
@@ -125,4 +141,23 @@ class CurrentPlayingSection(musicMediaPlayer:MusicMediaPlayer) {
             color = Laranja, // Cor da barra de progresso
         )
     }
+
+    @Composable
+    fun EnterAnimation(content: @Composable () -> Unit) {
+        AnimatedVisibility(
+            visibleState = MutableTransitionState(
+                initialState = false
+            ).apply { targetState = true },
+            modifier = Modifier,
+            enter = slideInVertically(
+                initialOffsetY = { -40 }
+            ) + expandVertically(
+                expandFrom = Alignment.Top
+            ) + fadeIn(initialAlpha = 0.3f),
+            exit = slideOutVertically() + shrinkVertically() + fadeOut(),
+        ) {
+            content()
+        }
+    }
+
 }
